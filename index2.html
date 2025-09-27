@@ -1,0 +1,108 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>TOD Development Capacity Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+      background: #f9f9f9;
+    }
+    h2 {
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #0079c1;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #005a91;
+    }
+    .result {
+      background: white;
+      border-radius: 8px;
+      padding: 15px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <h2>🚇 TOD Development Capacity Calculator</h2>
+
+  <label for="parcelSize">Parcel Size (sq ft):</label>
+  <input type="number" id="parcelSize" placeholder="Enter parcel size">
+
+  <label for="tier">TOD Tier:</label>
+  <select id="tier">
+    <option value="tier1">Tier 1</option>
+    <option value="tier2">Tier 2</option>
+  </select>
+
+  <label for="distance">Distance to Transit:</label>
+  <select id="distance">
+    <option value="200">Within 200 ft</option>
+    <option value="1320">Within 1/4 Mile</option>
+    <option value="2640">Within 1/2 Mile</option>
+  </select>
+
+  <button onclick="calculate()">Calculate Capacity</button>
+
+  <div class="result" id="output"></div>
+
+  <script>
+    const todTable = {
+      tier1: {
+        "200":  { height: 95, density: 160, lotEquiv: 272, far: 4.5 },
+        "1320": { height: 75, density: 120, lotEquiv: 363, far: 3.5 },
+        "2640": { height: 65, density: 100, lotEquiv: 436, far: 3.0 }
+      },
+      tier2: {
+        "200":  { height: 85, density: 140, lotEquiv: 311, far: 4.0 },
+        "1320": { height: 65, density: 100, lotEquiv: 436, far: 3.0 },
+        "2640": { height: 55, density: 80,  lotEquiv: 545, far: 2.5 }
+      }
+    };
+
+    function calculate() {
+      const parcelSize = parseFloat(document.getElementById("parcelSize").value);
+      const tier = document.getElementById("tier").value;
+      const distance = document.getElementById("distance").value;
+
+      if (isNaN(parcelSize) || parcelSize <= 0) {
+        document.getElementById("output").innerHTML = "<p>Please enter a valid parcel size.</p>";
+        return;
+      }
+
+      const standards = todTable[tier][distance];
+
+      // Units = parcel size / lot equivalency (rounded down)
+      const baseUnits = Math.floor(parcelSize / standards.lotEquiv);
+
+      document.getElementById("output").innerHTML = `
+        <h3>Results</h3>
+        <p><strong>Height Allowed:</strong> ${standards.height} ft</p>
+        <p><strong>Density Standard:</strong> ${standards.density} du/acre</p>
+        <p><strong>Density Per Lot Equivalency:</strong> 1 unit / ${standards.lotEquiv} sq ft</p>
+        <p><strong>Floor Area Ratio (FAR):</strong> ${standards.far}</p>
+        <p><strong>Estimated Units Allowed (per parcel size):</strong> ${baseUnits}</p>
+      `;
+    }
+  </script>
+</body>
+</html>
